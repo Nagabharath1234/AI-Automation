@@ -1,0 +1,151 @@
+{
+  "name": "pizza order",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "omniwyse restaurent",
+        "formDescription": "your pizza is here!",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "firstname",
+              "placeholder": "abhiram",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "order_id",
+              "fieldType": "number",
+              "placeholder": "2378",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "list of items",
+              "placeholder": "pizza and berger",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "adress",
+              "placeholder": "Hyderabad, omniwyse company"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5479caf6-39a2-448c-acf7-b7f327d6bd95",
+      "name": "On form submission",
+      "webhookId": "10273d57-d33a-4951-801d-6f295cbb4469"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=your pizza is here!\nfirstname: {{ $json.firstname }}\norder_id:{{ $json.order_id }}\nlist of items:{{ $json['list of items'] }}\nadress: {{ $json.adress }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8ce328f5-144d-406c-9483-b8bf15286dd2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "f51e8327-a379-453b-b976-48f1aec2bbca",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Mpd2frOGwt0jRzkI",
+          "name": "OpenRouter account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "bharathchowdhary79@gmail.com",
+        "subject": "regarding pizza order ",
+        "emailType": "text",
+        "message": "=Hi {{ $('On form submission').item.json.firstname }}, Thanks{{ $('On form submission').item.json.order_id }} for ordering with us! 🎉 Your {{ $('On form submission').item.json['list of items'] }}order # has been received.  🍕 Items: We’ll notify you once it’s on the way. Enjoy your pizza! 🍴",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "7cc07c8c-9fc6-40dd-a655-b07cf99d7e70",
+      "name": "Send a message",
+      "webhookId": "2936153c-557f-4adc-a9ef-69e8fad59c2d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "2GeuETfkCqcaUQ7f",
+          "name": "Gmail account 4"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "fe9d90b2-4116-4ba0-bc28-daf4e635604d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "170959d2801859339990bbea170ae9e52c17ef5adf885a98b52d193ccf6bec19"
+  },
+  "id": "CVgr6rGZ1i40x71y",
+  "tags": []
+}
