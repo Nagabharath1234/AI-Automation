@@ -1,0 +1,416 @@
+{
+  "name": "Packaging Manufacturing - Discover Analysis",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "Market Positioning Blueprint → We position you as the “go-to” packaging partner using AI-driven market research.\nBuyer Flow Guarantee → We deliver 30–50 qualified inquiries per month, every month, like clockwork.\nLead Qualification Engine → AI filters out tire-kickers so your sales team only talks to decision-makers.\nCompetitor Bypass System → Outreach gets you in front of buyers before your competitors even know.\nTrade Show Independence Plan → Replace slow, costly trade shows with a digital pipeline running 24/7.\nPremium Positioning Framework → Stop competing on price by branding you as the premium choice.\nCloser-Only Sales Workflow → We handle prospecting, your team just closes.\nDecision-Maker Database Access → Direct line to verified packaging buyers (emails, LinkedIn, direct dials).\nAI Outreach Execution → We set up, run, and optimize campaigns for you (no tech headaches).\nRevenue Smoothing System → No more feast-and-famine — your pipeline runs predictably.\nFast-Start Campaign Setup → Get live in under 14 days with your first leads flowing.\nOngoing Optimization & Reporting → Weekly updates, pipeline dashboards, and lead-quality scoring.\nPerformance Guarantee → If we don’t deliver, you don’t pay — zero risk.\nScaling Support → Once leads flow, we help you expand into new packaging verticals.\nWhite-Glove Implementation → Entire system built, run, and managed for you (truly DFY).",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        336
+      ],
+      "id": "4398aa7f-b859-4993-82af-9d58843c075f",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Market Visibility Audit – We analyze your current presence (website, LinkedIn, trade directories) to pinpoint why buyers can’t find you.\nCompetitor Positioning Map – We benchmark you against competitors to identify gaps where you can stand out.\nBuyer Avatar & List Build – We create a verified database of 500–1,000 decision-makers in your ideal industries.\nAI-Powered Outreach Engine – We deploy our ASM-based system to put your company in front of 30–50 buyers every month.\nAuthority Positioning Content – We craft messaging that highlights your unique strengths (quality, speed, innovation) and makes you the obvious choice.\nReal-Time Buyer Engagement – We deliver qualified inquiries straight to your inbox, with buyers already warmed up.\nQuarterly Market Domination Review – Every 90 days, we refine the strategy to ensure you’re not just visible, but top-of-mind in your industry. ",
+        "options": {
+          "systemMessage": "ok i wll do it"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "83d7439a-7e2d-4ac2-9131-1b688b7f01a6",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "18cbaacf-3352-4077-ada6-36e26cdee89e",
+      "name": "Wait",
+      "webhookId": "2aa48c28-eda4-492b-86a3-6241d7f22b26"
+    },
+    {
+      "parameters": {
+        "sendTo": "bharathchowdhary79@gmail.com",
+        "subject": "regarding packaging manufacture",
+        "emailType": "text",
+        "message": "= {{ $json.output }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        768,
+        0
+      ],
+      "id": "4af34aed-10ca-4cfc-b868-25a37fa589cf",
+      "name": "Send a message",
+      "webhookId": "ef17768b-71f3-4355-9c8d-02495e762ecc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Aj3cnLNvlkPSPiUc",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Add a new field called 'myNewField' to the JSON of the item\n$input.item.json.myNewField = 1;\n\nreturn $input.item;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "32ab4062-b0e4-486d-907d-3692e41d4a7d",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "fb3c8feb-d62e-4368-8c44-682330aca01b",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        144
+      ],
+      "id": "357fdc2d-4ea5-4586-a613-07660c04405d",
+      "name": "Webhook1",
+      "webhookId": "fb3c8feb-d62e-4368-8c44-682330aca01b"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "hii bharath",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        352,
+        336
+      ],
+      "id": "45d36a9f-39ab-4a4d-b2fb-f149202f7502",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        352,
+        544
+      ],
+      "id": "65f61565-caeb-4162-9275-44ca6fe82b98",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "JsTYrGAuDcAC4Iob",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1IUhYAAadJpsk5x_EqdvLI7OcizYm_49BcYRCk9f44-c",
+          "mode": "list",
+          "cachedResultName": "packaging manufacture",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUhYAAadJpsk5x_EqdvLI7OcizYm_49BcYRCk9f44-c/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1IUhYAAadJpsk5x_EqdvLI7OcizYm_49BcYRCk9f44-c/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "Output",
+              "displayName": "Output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Firstname",
+              "displayName": "Firstname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Lastname",
+              "displayName": "Lastname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Companyname",
+              "displayName": "Companyname",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Community",
+              "displayName": "Community",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Tutorial",
+              "displayName": "Tutorial",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Documentation",
+              "displayName": "Documentation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        704,
+        336
+      ],
+      "id": "e520d719-92c3-4975-b624-0f97ad4323d6",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "model": "groq/compound",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        0,
+        576
+      ],
+      "id": "5199d5f9-abe5-4f52-8f3b-ace9abc4b301",
+      "name": "Groq Chat Model1",
+      "credentials": {
+        "groqApi": {
+          "id": "JsTYrGAuDcAC4Iob",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "groq/compound",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        0,
+        192
+      ],
+      "id": "f717a477-2ace-4fb2-878a-2ef3d055d02c",
+      "name": "Groq Chat Model2",
+      "credentials": {
+        "groqApi": {
+          "id": "JsTYrGAuDcAC4Iob",
+          "name": "Groq account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "d2016945-605a-46ba-be3c-ed5875f05cef",
+  "meta": {
+    "instanceId": "bac82d060121a7236925e882ffecd839bbd440fdf92c53fe6ecf6d19f3a6fc42"
+  },
+  "id": "NzoHzblWbFGmNnbA",
+  "tags": []
+}

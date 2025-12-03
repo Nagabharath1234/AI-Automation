@@ -1,0 +1,491 @@
+Generating Text to Image and Video - n8n Workflow Documentation
+Overview
+This n8n workflow is a comprehensive AI-powered video generation system that creates videos from text prompts and images using multiple AI models and services. The scenario demonstrates five different video generation approaches: basic text-to-video conversion, image-to-video animation, "Cameos" (personalized video creation), storyboard-based video generation, and AI-enhanced text-to-video with Google Gemini integration. The workflow is manually triggered and uses the kie.ai API (which provides access to advanced AI video models including Sora 2 and Runway) to generate professional-quality videos from various inputs. Each generation path includes polling mechanisms to wait for video processing completion before retrieving the final results.
+Connected Applications
+
+kie.ai API (AI video generation service - Sora 2, Runway models)
+Google Gemini AI (for advanced prompt processing)
+Image hosting service (image2url.com for source images)
+
+Workflow Modules
+Main Trigger
+1. Manual Trigger
+
+ID: 74b3b6be-d2e7-49e2-8018-f0e1ac290aeb
+Module: n8n-nodes-base.manualTrigger
+Version: 1
+Name: When clicking 'Execute workflow'
+Description: Starts the workflow manually when the user clicks the execute button in the n8n interface. This serves as the entry point for all video generation operations in the workflow.
+
+
+TEXT TO VIDEO SECTION (Basic)
+2. Video Prompt
+
+ID: d3abf9a2-d1ee-429f-8692-4cf440c71d63
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video Prompt
+Mapper Data: Single unnamed assignment with value: "A cinematic shot of a beautiful sunset over mountains, golden hour lighting, birds flying across the sky, camera slowly panning right, 4K quality, professional cinematography."
+Description: Stores a predefined text prompt for basic text-to-video generation. This prompt describes a cinematic mountain sunset scene with specific visual and technical requirements.
+
+3. Text to Video
+
+ID: 516b60d4-0803-4a35-a709-9e5afb7bcda6
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Text to video
+API Endpoint: https://api.kie.ai/api/v1/video/generate
+Authentication: HTTP Header Auth
+Credentials: httpHeaderAuth (ID: nqseSMMdnbXIGTS6)
+Request Body:
+
+json{
+  "model": "sora-2-text-to-video",
+  "input": {
+    "prompt": "A Video of Young Man Throwing a Coffee mug against the wall.",
+    "aspect_ratio": "landscape",
+    "n_frames": "10",
+    "remove_watermark": true
+  }
+}
+
+Query Parameters: X-Api-Key: a0fb1208693a068a1f69d0174bbfa33a
+Description: Initiates video generation using the Sora 2 text-to-video model via kie.ai API. The request specifies landscape orientation, 10 frames, and watermark removal. This is an asynchronous operation that returns a task ID for later retrieval.
+
+4. Wait
+
+ID: 5da221a8-263b-4023-a23d-51660636f8fc
+Module: n8n-nodes-base.wait
+Version: 1.1
+Name: Wait
+Webhook ID: f994a5f3-192c-48ae-88d5-1e340f465479
+Parameters: Amount: 1 (minute)
+Description: Pauses workflow execution for 1 minute to allow the video generation process to complete. This is a webhook-based wait that can be resumed when the video is ready.
+
+5. Get Video
+
+ID: a57135c1-6897-4bc5-91ff-ce9b6aefd437
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Get Video
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Authentication: HTTP Header Auth
+Credentials: httpHeaderAuth (ID: nqseSMMdnbXIGTS6)
+Query Parameters: taskId: "taskname"
+Description: Polls the kie.ai API to check the status and retrieve information about the video generation job using the task ID from the previous request.
+
+6. If1
+
+ID: 8d346835-45ad-4741-8a0d-a3b016a44309
+Module: n8n-nodes-base.if
+Version: 2.2
+Name: If1
+Conditions: Left value equals "Success" (case sensitive, strict type validation)
+Description: Checks if the video generation job has completed successfully by comparing the status to "Success". Routes to video URL extraction if successful, or back to the Wait node if still processing.
+
+7. Video URL
+
+ID: a8e07626-ba0b-4201-8654-1eaac74df916
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video URL
+Mapper Data: Single assignment - video_url (empty string value)
+Description: Extracts and stores the final video URL from the successful API response for the basic text-to-video generation.
+
+
+IMAGE TO VIDEO SECTION
+8. Image url
+
+ID: 4d8d7e9a-1cd3-4e3e-9810-2e6a2348e044
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Image url
+Mapper Data: Photo: https://image2url.com/images/1761826125650-c0756f99-8b9c-4fb7-940a-521e86315477.jpeg
+Description: Stores the source image URL that will be animated into a video. This image serves as the starting frame for the image-to-video conversion process.
+
+9. Video prompt 1
+
+ID: f525151d-d047-46a2-9855-88c854b8b317
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video prompt 1
+Mapper Data: Two assignments:
+
+"Animate this architectural scene with dramatic lighting changes from day to sunset. Add atmospheric elements like moving shadows, light reflections, and subtle camera panning to showcase the structure."
+"A realistic UGC style video of a young woman with curly hair sitting in her car recording a selfie style video of herself holding the product, which is in the source image. Nothing about the product from the source image should change. It should appear exactly as given. In the video, the woman says, 'I absolutely love this curl cream. It keeps my hair bouncy, curly, and lightweight all day long. You guys HAVE to try it!' She speaks enthusiastically and authentically."
+
+
+Description: Contains two different prompts for image-to-video animation: one for architectural scenes and one for product demonstration UGC (user-generated content) style videos.
+
+10. Image to Video
+
+ID: bc3055ce-04ea-48a7-ac68-d8de22e5a155
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Image to Video
+API Endpoint: https://api.kie.ai/api/v1/runway/generate
+Method: POST
+Authentication: HTTP Header Auth via Bearer token
+Credentials: httpHeaderAuth (ID: nqseSMMdnbXIGTS6)
+Headers:
+
+Authorization: Bearer a0fb1208693a068a1f69d0174bbfa33a
+Content-Type: application/json
+
+
+Request Body:
+
+json{
+  "prompt": "A fluffy cat dancing energetically in a colorful room with disco lights",
+  "imageUrl": "https://example.com/cat-image.jpg",
+  "model": "runway-duration-5-generate",
+  "waterMark": "kie.ai"
+}
+
+Description: Converts a static image into an animated video using Runway's image-to-video model. The API generates a 5-second video based on both the source image and text prompt, with kie.ai watermark.
+
+11. Wait1
+
+ID: 57dc13f8-5762-4d28-b949-1d772896d308
+Module: n8n-nodes-base.wait
+Version: 1.1
+Name: Wait1
+Webhook ID: 9fded5f2-e425-4e20-950b-b07fb0020027
+Description: Pauses execution to allow the image-to-video conversion process to complete before checking the job status.
+
+12. Get Video 1
+
+ID: 9c109b5f-33e3-4c85-b738-51f40efde4b1
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Get Video 1
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Retrieves the status and information about the image-to-video generation job.
+
+13. If 2
+
+ID: a422360b-6910-4af1-9b3d-40b2e7c8f94e
+Module: n8n-nodes-base.if
+Version: 2.2
+Name: If 2
+Conditions: Equality check with case-sensitive and strict type validation
+Description: Validates whether the image-to-video job has completed successfully, routing to URL extraction or back to waiting based on status.
+
+14. Video URL 1
+
+ID: 8565096b-484b-495b-83d0-ce9236d06d4c
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video URL 1
+Description: Extracts and stores the final video URL from the successful image-to-video conversion.
+
+
+CAMEOS SECTION
+15. Video Prompt 2
+
+ID: c7a577ce-91c0-48c7-9136-3f6f6db20e41
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video Prompt 2
+Description: Stores the text prompt for the Cameos feature, which likely creates personalized videos with user-provided images or avatars.
+
+16. Text to Video1
+
+ID: e0bf9340-a661-44fa-908e-ebeeb5d4516c
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Text to Video1
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Initiates the Cameos video generation process using the kie.ai API.
+
+17. Wait2
+
+ID: 6e1afddf-6ada-4643-b75c-f868df8c6290
+Module: n8n-nodes-base.wait
+Version: 1.1
+Name: Wait2
+Webhook ID: 0e95ad73-8993-493f-b1dd-b401c5f018e7
+Description: Pauses execution while the Cameos video is being generated.
+
+18. Get Video1
+
+ID: a3207b21-6561-4ca7-a3ba-8cd4da94abbf
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Get Video1
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Polls for the Cameos video generation job status and retrieves results.
+
+19. If
+
+ID: 87a3d42a-2143-4766-8739-6f852c1da8f9
+Module: n8n-nodes-base.if
+Version: 2.2
+Name: If
+Conditions: Equality comparison with case-sensitive and strict validation
+Description: Checks if the Cameos video generation has completed successfully.
+
+20. Video URL1
+
+ID: e8f1f9c0-4680-4448-88c0-91515bfcf324
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video URL1
+Description: Extracts and stores the final Cameos video URL.
+
+
+STORYBOARD SECTION
+21. Video Prompts
+
+ID: 86873783-b23d-4634-ba61-e7a3fd9ceb53
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video Prompts
+Description: Stores multiple prompts for storyboard-based video generation, allowing for multi-scene or sequential video creation.
+
+22. Story Request
+
+ID: 6c754436-816a-4363-86d2-729dc9bdf888
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Story Request
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Initiates a storyboard-based video generation request, likely creating a multi-scene narrative video.
+
+23. Wait3
+
+ID: 818c1f68-9bc2-4659-8c2b-b2ec96fc0a08
+Module: n8n-nodes-base.wait
+Version: 1.1
+Name: Wait3
+Webhook ID: d56d682c-780a-4ef3-94c9-ed4db720396d
+Description: Pauses execution while the storyboard video is being generated.
+
+24. Get Video 2
+
+ID: 20dbcf99-eedb-44f4-a098-8d78c1ac4427
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Get Video 2
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Polls for storyboard video generation status and retrieves the completed video information.
+
+25. If2
+
+ID: fc9b76f6-5ea9-4c6a-aba1-cf9fdb1b3495
+Module: n8n-nodes-base.if
+Version: 2.2
+Name: If2
+Conditions: Equality check with strict validation
+Description: Validates the completion status of the storyboard video generation.
+
+26. Video URL 2
+
+ID: 32b7be4c-1dd4-4143-b830-90bf1a5f38af
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video URL 2
+Description: Stores the final storyboard video URL.
+
+27. Default
+
+ID: 8839f704-ca21-4907-8469-23265bcc405d
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Default
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: A fallback or default handler for storyboard video retrieval operations.
+
+
+AI-ENHANCED TEXT TO VIDEO SECTION
+28. Video prompt 3
+
+ID: 99f6f570-ace5-4fe1-8fca-5e9a69d2b0d0
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video prompt 3
+Description: Stores the initial prompt that will be processed by Google Gemini AI before video generation.
+
+29. AI Agent
+
+ID: 9f1259c6-518b-4e50-9e47-e17ac0a709e4
+Module: @n8n/n8n-nodes-langchain.agent
+Version: 2.2
+Name: AI Agent
+Prompt Type: define
+Text: "hii"
+Description: LangChain-powered AI agent that processes video prompts using Google Gemini's language model to enhance or refine the video generation instructions before sending to the kie.ai API.
+
+30. Google Gemini Chat Model
+
+ID: 8e325172-f3ca-475b-823a-042cf7476497
+Module: @n8n/n8n-nodes-langchain.lmChatGoogleGemini
+Version: 1
+Name: Google Gemini Chat Model
+Credentials: googlePalmApi (ID: tUR0hK4bVwsD1fvN, Name: "Google Gemini(PaLM) Api account")
+Description: Provides Google Gemini AI capabilities to the AI Agent for intelligent prompt processing and enhancement.
+
+31. Text to Video
+
+ID: d0a88a60-1741-454a-8493-b426ab8ba2da
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Text to Video
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Generates video using the AI-enhanced prompt from Google Gemini.
+
+32. Wait4
+
+ID: 0eb5cd70-7e74-44e4-957f-45dcb5be405f
+Module: n8n-nodes-base.wait
+Version: 1.1
+Name: Wait4
+Webhook ID: cbc2bc3e-784e-4c7e-ab85-a1aebc797e57
+Description: Pauses execution while the AI-enhanced video is being generated.
+
+33. Get Video 4
+
+ID: a532dda6-11d2-470b-b74d-689e2703ddb6
+Module: n8n-nodes-base.httpRequest
+Version: 4.2
+Name: Get Video 4
+API Endpoint: https://api.kie.ai/api/v1/jobs/recordInfo
+Description: Retrieves the status and results of the AI-enhanced video generation job.
+
+34. If 5
+
+ID: 05c7866b-0a81-4e22-a4fe-2a57380a11cc
+Module: n8n-nodes-base.if
+Version: 2.2
+Name: If 5
+Conditions: Equality check with strict validation
+Description: Validates the completion of the AI-enhanced video generation process.
+
+35. Video URL 4
+
+ID: 80a3653f-dd8c-4198-93fe-48f1f395f58b
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Video URL 4
+Description: Stores the final URL for the AI-enhanced video.
+
+
+ADDITIONAL UTILITY NODES
+36. Bad
+
+ID: 65485e2d-fe9d-4058-a7de-dd9200cf8f29
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Bad
+Description: Likely a placeholder or test node for handling error cases or failed video generation attempts.
+
+37. Good
+
+ID: f5756e21-935a-4826-b80b-a2d88d84b7fd
+Module: n8n-nodes-base.set
+Version: 3.4
+Name: Good
+Description: Likely a placeholder or test node for handling successful video generation cases.
+
+
+VISUAL ORGANIZATION (STICKY NOTES)
+38. Sticky Note - Image to Video
+
+ID: 945d782f-f686-447e-b7f5-cabbfa559488
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note
+Content: "Image to Video"
+Metadata: Height: 288px, Width: 1472px, Color: 5
+Description: Visual label marking the Image to Video workflow section.
+
+39. Sticky Note1 - Text To Video
+
+ID: 8d090327-f591-44b8-834a-b60ade1dc74a
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note1
+Content: "Text To Video"
+Metadata: Height: 240px, Width: 1184px
+Description: Visual label marking the basic Text to Video workflow section.
+
+40. Sticky Note2 - Cameos
+
+ID: 2343d5ec-9240-4796-9e96-a4cf96613ce4
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note2
+Content: "Cameos"
+Metadata: Height: 256px, Width: 1152px, Color: 4
+Description: Visual label marking the Cameos workflow section.
+
+41. Sticky Note3 - Text To Video
+
+ID: 777891a2-abad-4347-8105-6c69e3f9c39b
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note3
+Content: "Text To Video"
+Metadata: Height: 288px, Width: 1680px, Color: 6
+Description: Visual label marking the AI-enhanced Text to Video workflow section.
+
+42. Sticky Note4 - Story Board
+
+ID: a1beec19-06b0-4274-bed7-60c677302de6
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note4
+Content: "Story Board"
+Metadata: Height: 272px, Width: 1216px, Color: 3
+Description: Visual label marking the Storyboard workflow section.
+
+43. Sticky Note5
+
+ID: 67ebb585-d855-46df-9132-deff20958324
+Module: n8n-nodes-base.stickyNote
+Version: 1
+Name: Sticky Note5
+Metadata: Height: 224px, Width: 496px
+Description: Additional visual organization element, content unspecified.
+
+
+Workflow Execution Flows
+Flow 1 - Basic Text to Video:
+Manual Trigger → Video Prompt → Text to video → Wait → Get Video → If1 → Video URL (or loop back to Wait)
+Flow 2 - Image to Video:
+Manual Trigger → Image url → Video prompt 1 → Image to Video → Wait1 → Get Video 1 → If 2 → Video URL 1 (or loop back to Wait1)
+Flow 3 - Cameos:
+Video Prompt 2 → Text to Video1 → Wait2 → Get Video1 → If → Video URL1 (or loop back to Wait2)
+Flow 4 - Storyboard:
+Video Prompts → Story Request → Wait3 → Get Video 2 → If2 → Video URL 2 → Default (or loop back to Wait3)
+Flow 5 - AI-Enhanced Text to Video:
+Video prompt 3 → AI Agent (powered by Google Gemini Chat Model) → Text to Video → Wait4 → Get Video 4 → If 5 → Video URL 4 (or loop back to Wait4)
+Auxiliary Flow:
+Bad → Good
+Technical Notes
+
+Current Status: Inactive (active: false)
+Execution Order: v1
+Pin Data: Empty (no test data pinned)
+Primary API: kie.ai (providing access to Sora 2, Runway, and other AI video models)
+Authentication: All API calls use HTTP Header authentication with API key a0fb1208693a068a1f69d0174bbfa33a
+Polling Pattern: Each generation path uses a Wait → Get → If loop to poll for completion
+Model Types:
+
+Sora 2 (text-to-video)
+Runway Duration 5 (image-to-video)
+Various unnamed models for Cameos and Storyboard features
+
+
+Video Specifications: Landscape aspect ratio, 10 frames, watermark removal options available
+
+Use Cases
+This workflow is designed for:
+
+Content creators needing multiple video generation options in one workflow
+Marketing teams creating various types of video content from text and images
+Social media managers generating UGC-style product videos
+Video production agencies testing different AI video generation approaches
+Developers experimenting with different AI video APIs and models
+Storytellers creating narrative videos from storyboard prompts
+Claude can make mistakes. Please double-check responses.

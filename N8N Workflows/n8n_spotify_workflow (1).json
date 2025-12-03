@@ -1,0 +1,306 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        300
+      ],
+      "id": "telegram-trigger",
+      "name": "Telegram Trigger",
+      "webhookId": "telegram-mood-playlist",
+      "credentials": {
+        "telegramApi": {
+          "id": "uFDLhKCySHcDouXp",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=User request: {{ $json.message.text }}\n\nYou are a music playlist assistant. Based on the user's mood/request:\n1. Identify the mood/genre they want (sad, happy, energetic, romantic, workout, chill, party, focus, etc.)\n2. Generate 3-5 relevant search queries for Spotify that would find good songs for this mood\n3. Consider Telugu, Hindi, and English songs\n4. Return ONLY a JSON array of search queries, nothing else\n\nExample output format:\n[\"sad telugu songs\", \"heartbreak hindi songs\", \"emotional english ballads\"]",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a music expert. Return only valid JSON arrays of search queries."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        460,
+        300
+      ],
+      "id": "ai-agent",
+      "name": "AI Music Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {
+          "temperature": 0.7
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        480
+      ],
+      "id": "openai-model",
+      "name": "OpenAI Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "rjcE2QD1VyxCzfzO",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "type": "structured"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        460,
+        660
+      ],
+      "id": "json-parser",
+      "name": "JSON Parser"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Parse AI response and create search queries\nconst aiResponse = $input.first().json.output;\nlet queries = [];\n\ntry {\n  // Try to parse if it's a string\n  if (typeof aiResponse === 'string') {\n    queries = JSON.parse(aiResponse);\n  } else if (Array.isArray(aiResponse)) {\n    queries = aiResponse;\n  }\n} catch (e) {\n  // Fallback queries based on common moods\n  queries = ['trending songs', 'popular hits'];\n}\n\n// Return each query as separate item for parallel processing\nreturn queries.map(query => ({\n  json: {\n    searchQuery: query,\n    chatId: $('Telegram Trigger').item.json.message.chat.id,\n    originalRequest: $('Telegram Trigger').item.json.message.text\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        680,
+        300
+      ],
+      "id": "process-queries",
+      "name": "Process Search Queries"
+    },
+    {
+      "parameters": {
+        "resource": "track",
+        "operation": "search",
+        "query": "={{ $json.searchQuery }}",
+        "filters": {
+          "limit": 10
+        }
+      },
+      "type": "n8n-nodes-base.spotify",
+      "typeVersion": 1,
+      "position": [
+        900,
+        300
+      ],
+      "id": "search-spotify",
+      "name": "Search Spotify",
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "wv4GwC4zgpJTzbZj",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all tracks from all searches and remove duplicates\nconst allTracks = [];\nconst seenIds = new Set();\n\nfor (const item of $input.all()) {\n  const trackUri = item.json.uri;\n  const trackId = item.json.id;\n  \n  if (!seenIds.has(trackId)) {\n    seenIds.add(trackId);\n    allTracks.push({\n      uri: trackUri,\n      name: item.json.name,\n      artist: item.json.artists[0]?.name || 'Unknown'\n    });\n  }\n}\n\n// Limit to 25 tracks max\nconst selectedTracks = allTracks.slice(0, 25);\n\nreturn [{\n  json: {\n    tracks: selectedTracks,\n    trackUris: selectedTracks.map(t => t.uri),\n    chatId: $('Process Search Queries').first().json.chatId,\n    originalRequest: $('Process Search Queries').first().json.originalRequest,\n    trackCount: selectedTracks.length\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1120,
+        300
+      ],
+      "id": "deduplicate-tracks",
+      "name": "Collect & Deduplicate Tracks"
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "operation": "create",
+        "name": "={{ $json.originalRequest }} - {{ $now.format('DD MMM') }}",
+        "additionalFields": {
+          "description": "=Generated playlist for: {{ $json.originalRequest }}"
+        }
+      },
+      "type": "n8n-nodes-base.spotify",
+      "typeVersion": 1,
+      "position": [
+        1340,
+        300
+      ],
+      "id": "create-playlist",
+      "name": "Create Playlist",
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "wv4GwC4zgpJTzbZj",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "playlist",
+        "operation": "addSong",
+        "playlistId": "={{ $json.id }}",
+        "trackId": "={{ $('Collect & Deduplicate Tracks').item.json.trackUris.join(',') }}"
+      },
+      "type": "n8n-nodes-base.spotify",
+      "typeVersion": 1,
+      "position": [
+        1560,
+        300
+      ],
+      "id": "add-tracks",
+      "name": "Add Tracks",
+      "credentials": {
+        "spotifyOAuth2Api": {
+          "id": "wv4GwC4zgpJTzbZj",
+          "name": "Spotify account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Collect & Deduplicate Tracks').item.json.chatId }}",
+        "text": "=🎵 *Your Playlist is Ready!*\n\n📝 *Request:* {{ $('Collect & Deduplicate Tracks').item.json.originalRequest }}\n🎼 *Tracks Added:* {{ $('Collect & Deduplicate Tracks').item.json.trackCount }}\n\n🔗 *Listen Now:*\n{{ $json.external_urls.spotify }}\n\nEnjoy your music! 🎧",
+        "additionalFields": {
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1780,
+        300
+      ],
+      "id": "send-response",
+      "name": "Send Response",
+      "webhookId": "telegram-response",
+      "credentials": {
+        "telegramApi": {
+          "id": "uFDLhKCySHcDouXp",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Music Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Music Agent": {
+      "main": [
+        [
+          {
+            "node": "Process Search Queries",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Music Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "JSON Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Music Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Search Queries": {
+      "main": [
+        [
+          {
+            "node": "Search Spotify",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Spotify": {
+      "main": [
+        [
+          {
+            "node": "Collect & Deduplicate Tracks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Collect & Deduplicate Tracks": {
+      "main": [
+        [
+          {
+            "node": "Create Playlist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Playlist": {
+      "main": [
+        [
+          {
+            "node": "Add Tracks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add Tracks": {
+      "main": [
+        [
+          {
+            "node": "Send Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

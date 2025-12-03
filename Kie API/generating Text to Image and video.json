@@ -1,0 +1,1199 @@
+{
+  "name": "generating Text to Image and video",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -400,
+        128
+      ],
+      "id": "57dc13f8-5762-4d28-b949-1d772896d308",
+      "name": "Wait1",
+      "webhookId": "9fded5f2-e425-4e20-950b-b07fb0020027"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        128
+      ],
+      "id": "74b3b6be-d2e7-49e2-8018-f0e1ac290aeb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -704,
+        -192
+      ],
+      "id": "5da221a8-263b-4023-a23d-51660636f8fc",
+      "name": "Wait",
+      "webhookId": "f994a5f3-192c-48ae-88d5-1e340f465479"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/video/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "X-Api-Key",
+              "value": "a0fb1208693a068a1f69d0174bbfa33a"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sora-2-text-to-video\",\n  \"input\": {\n    \"prompt\": \"A Video of Young Man Throwing a Coffee mug against the wall.\",\n    \"aspect_ratio\": \"landscape\",\n    \"n_frames\": \"10\",\n    \"remove_watermark\": true\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -912,
+        -192
+      ],
+      "id": "516b60d4-0803-4a35-a709-9e5afb7bcda6",
+      "name": "Text to video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nqseSMMdnbXIGTS6",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d35d4c4-9cd2-48bd-aa7f-238542fc82eb",
+              "name": "video_url",
+              "value": "",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -176,
+        -208
+      ],
+      "id": "a8e07626-ba0b-4201-8654-1eaac74df916",
+      "name": "Video URL"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9c549d40-acfa-42ca-8b38-5fad2cfa532d",
+              "name": "",
+              "value": "A cinematic shot of a beautiful sunset over mountains, golden hour lighting, birds flying across the sky, camera slowly panning right, 4K quality, professional cinematography.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1104,
+        -192
+      ],
+      "id": "d3abf9a2-d1ee-429f-8692-4cf440c71d63",
+      "name": "Video Prompt"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "taskname"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -528,
+        -192
+      ],
+      "id": "a57135c1-6897-4bc5-91ff-ce9b6aefd437",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nqseSMMdnbXIGTS6",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "313ee4d1-090d-45f7-ad40-a8898b74fdfc",
+              "leftValue": "",
+              "rightValue": "Success",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -368,
+        -192
+      ],
+      "id": "8d346835-45ad-4741-8a0d-a3b016a44309",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "679ea9ff-4d4a-47ee-be55-01334520cfc4",
+              "name": "Animate this architectural scene with dramatic lighting changes from day to sunset. Add atmospheric elements like moving shadows, light reflections, and subtle camera panning to showcase the structure.",
+              "value": "A realistic UGC style video of a young woman with curly hair sitting in her car recording a selfie style video of herself holding the product, which is in the source image. Nothing about the product from the source image should change. It should appear exactly as given. In the video, the woman says, 'I absolutely love this curl cream. It keeps my hair bouncy, curly, and lightweight all day long. You guys HAVE to try itl' She speaks enthusiastically and authentically.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -752,
+        128
+      ],
+      "id": "f525151d-d047-46a2-9855-88c854b8b317",
+      "name": "Video prompt 1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/runway/generate",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer  a0fb1208693a068a1f69d0174bbfa33a"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{ \"prompt\": \"A fluffy cat dancing energetically in a colorful room with disco lights\",\n  \"imageUrl\": \"https://example.com/cat-image.jpg\",\n  \"model\": \"runway-duration-5-generate\",\n  \"waterMark\": \"kie.ai\"\n  \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -576,
+        128
+      ],
+      "id": "bc3055ce-04ea-48a7-ac68-d8de22e5a155",
+      "name": "Image to Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "nqseSMMdnbXIGTS6",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        128
+      ],
+      "id": "9c109b5f-33e3-4c85-b738-51f40efde4b1",
+      "name": "Get Video 1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "81dab872-1617-4099-b5ba-ce41524bd48d",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        128
+      ],
+      "id": "a422360b-6910-4af1-9b3d-40b2e7c8f94e",
+      "name": "If 2"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        112,
+        112
+      ],
+      "id": "8565096b-484b-495b-83d0-ce9236d06d4c",
+      "name": "Video URL 1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -800,
+        400
+      ],
+      "id": "6e1afddf-6ada-4643-b75c-f868df8c6290",
+      "name": "Wait2",
+      "webhookId": "0e95ad73-8993-493f-b1dd-b401c5f018e7"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d2372b5b-1d13-446a-a8f3-04a35f0e7401",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -464,
+        400
+      ],
+      "id": "87a3d42a-2143-4766-8739-6f852c1da8f9",
+      "name": "If"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -864,
+        720
+      ],
+      "id": "818c1f68-9bc2-4659-8c2b-b2ec96fc0a08",
+      "name": "Wait3",
+      "webhookId": "d56d682c-780a-4ef3-94c9-ed4db720396d"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "f0abec68-4196-4de8-bb4f-d3c3ab2fe9d3",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -560,
+        720
+      ],
+      "id": "fc9b76f6-5ea9-4c6a-aba1-cf9fdb1b3495",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=hii",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1088,
+        992
+      ],
+      "id": "9f1259c6-518b-4e50-9e47-e17ac0a709e4",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        -640,
+        992
+      ],
+      "id": "0eb5cd70-7e74-44e4-957f-45dcb5be405f",
+      "name": "Wait4",
+      "webhookId": "cbc2bc3e-784e-4c7e-ab85-a1aebc797e57"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1088,
+        1168
+      ],
+      "id": "8e325172-f3ca-475b-823a-042cf7476497",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "tUR0hK4bVwsD1fvN",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1376,
+        1360
+      ],
+      "id": "65485e2d-fe9d-4058-a7de-dd9200cf8f29",
+      "name": "Bad"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1168,
+        1360
+      ],
+      "id": "f5756e21-935a-4826-b80b-a2d88d84b7fd",
+      "name": "Good"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -800,
+        992
+      ],
+      "id": "d0a88a60-1741-454a-8493-b426ab8ba2da",
+      "name": "Text to Video"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1248,
+        992
+      ],
+      "id": "99f6f570-ace5-4fe1-8fca-5e9a69d2b0d0",
+      "name": "Video prompt 3"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -496,
+        992
+      ],
+      "id": "a532dda6-11d2-470b-b74d-689e2703ddb6",
+      "name": "Get Video 4"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3f68cdad-5538-466c-a60c-ab67de3d64b8",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -320,
+        992
+      ],
+      "id": "05c7866b-0a81-4e22-a4fe-2a57380a11cc",
+      "name": "If 5"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -128,
+        976
+      ],
+      "id": "80a3653f-dd8c-4198-93fe-48f1f395f58b",
+      "name": "Video URL 4"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        704
+      ],
+      "id": "8839f704-ca21-4907-8469-23265bcc405d",
+      "name": "Default"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -384,
+        704
+      ],
+      "id": "32b7be4c-1dd4-4143-b830-90bf1a5f38af",
+      "name": "Video URL 2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        720
+      ],
+      "id": "20dbcf99-eedb-44f4-a098-8d78c1ac4427",
+      "name": "Get Video 2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1024,
+        720
+      ],
+      "id": "6c754436-816a-4363-86d2-729dc9bdf888",
+      "name": "Story Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1168,
+        720
+      ],
+      "id": "86873783-b23d-4634-ba61-e7a3fd9ceb53",
+      "name": "Video Prompts"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1120,
+        400
+      ],
+      "id": "c7a577ce-91c0-48c7-9136-3f6f6db20e41",
+      "name": "Video Prompt 2"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -960,
+        400
+      ],
+      "id": "e0bf9340-a661-44fa-908e-ebeeb5d4516c",
+      "name": "Text to Video1"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -640,
+        400
+      ],
+      "id": "a3207b21-6561-4ca7-a3ba-8cd4da94abbf",
+      "name": "Get Video1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -256,
+        384
+      ],
+      "id": "e8f1f9c0-4680-4448-88c0-91515bfcf324",
+      "name": "Video URL1"
+    },
+    {
+      "parameters": {
+        "content": "Image to Video\n",
+        "height": 288,
+        "width": 1472,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1152,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "945d782f-f686-447e-b7f5-cabbfa559488",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "29ab5d96-a5bb-48b5-9a87-7f8837dc3956",
+              "name": "Photo",
+              "value": "https://image2url.com/images/1761826125650-c0756f99-8b9c-4fb7-940a-521e86315477.jpeg",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -928,
+        128
+      ],
+      "id": "4d8d7e9a-1cd3-4e3e-9810-2e6a2348e044",
+      "name": "Image url"
+    },
+    {
+      "parameters": {
+        "content": "Text To Video",
+        "height": 240,
+        "width": 1184
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1152,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "8d090327-f591-44b8-834a-b60ade1dc74a",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Cameos",
+        "height": 256,
+        "width": 1152,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1152,
+        368
+      ],
+      "typeVersion": 1,
+      "id": "2343d5ec-9240-4796-9e96-a4cf96613ce4",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Text To Video",
+        "height": 288,
+        "width": 1680,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1456,
+        976
+      ],
+      "typeVersion": 1,
+      "id": "777891a2-abad-4347-8105-6c69e3f9c39b",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "Story Board",
+        "height": 272,
+        "width": 1216,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1264,
+        672
+      ],
+      "typeVersion": 1,
+      "id": "a1beec19-06b0-4274-bed7-60c677302de6",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "height": 224,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1440,
+        1312
+      ],
+      "typeVersion": 1,
+      "id": "67ebb585-d855-46df-9132-deff20958324",
+      "name": "Sticky Note5"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get Video 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Image url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text to video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Prompt": {
+      "main": [
+        [
+          {
+            "node": "Text to video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Video URL",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video prompt 1": {
+      "main": [
+        [
+          {
+            "node": "Image to Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image to Video": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video 1": {
+      "main": [
+        [
+          {
+            "node": "If 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 2": {
+      "main": [
+        [
+          {
+            "node": "Video URL 1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video URL 1": {
+      "main": [
+        []
+      ]
+    },
+    "Wait2": {
+      "main": [
+        [
+          {
+            "node": "Get Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Video URL1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait3": {
+      "main": [
+        [
+          {
+            "node": "Get Video 2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Video URL 2",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Text to Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait4": {
+      "main": [
+        [
+          {
+            "node": "Get Video 4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Bad": {
+      "main": [
+        [
+          {
+            "node": "Good",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text to Video": {
+      "main": [
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video prompt 3": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video 4": {
+      "main": [
+        [
+          {
+            "node": "If 5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If 5": {
+      "main": [
+        [
+          {
+            "node": "Video URL 4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Wait4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default": {
+      "main": [
+        []
+      ]
+    },
+    "Video URL 2": {
+      "main": [
+        [
+          {
+            "node": "Default",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video 2": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Story Request": {
+      "main": [
+        [
+          {
+            "node": "Wait3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Prompts": {
+      "main": [
+        [
+          {
+            "node": "Story Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Video Prompt 2": {
+      "main": [
+        [
+          {
+            "node": "Text to Video1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text to Video1": {
+      "main": [
+        [
+          {
+            "node": "Wait2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Video1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Image url": {
+      "main": [
+        [
+          {
+            "node": "Video prompt 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "667a6bb8-7ea9-4c5e-a02f-fa65fe5679e7",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "bac82d060121a7236925e882ffecd839bbd440fdf92c53fe6ecf6d19f3a6fc42"
+  },
+  "id": "TXDWZJ5USALY15St",
+  "tags": []
+}
